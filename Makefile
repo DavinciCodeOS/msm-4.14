@@ -381,7 +381,6 @@ endif
 
 # Make variables (CC, etc...)
 CPP		= $(CC) -E
-
 ifneq ($(LLVM),)
 CC			= clang
 LD			= ld.lld
@@ -698,12 +697,22 @@ LDFINAL_vmlinux := $(LD)
 LD		:= $(LDGOLD)
 LDFLAGS		+= -plugin LLVMgold.so
 endif
+
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
+ifneq ($(findstring llvm-ar,$(AR)),)
+LLVM_AR		:= $(AR)
+else
 LLVM_AR		:= llvm-ar
-LLVM_NM		:= llvm-nm
-export LLVM_AR LLVM_NM
 endif
+
+ifneq ($(findstring llvm-nm,$(NM)),)
+LLVM_NM		:= $(NM)
+else
+LLVM_NM		:= llvm-nm
+endif
+
+export LLVM_AR LLVM_NM
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
