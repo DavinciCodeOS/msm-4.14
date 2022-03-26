@@ -5,7 +5,11 @@
 # A mix between the arm64 and arm vDSO Makefiles.
 
 ifeq ($(cc-name),clang)
-  CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32) -no-integrated-as $(CLANG_GCC32_TC) $(CLANG_PREFIX32)
+  ifeq ($(ld-name),lld)
+    CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32) -fuse-ld=lld $(CLANG_GCC32_TC) $(CLANG_PREFIX32)
+  else
+    CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32) $(CLANG_GCC32_TC) $(CLANG_PREFIX32)
+  endif
 else
   CC_ARM32 := $(CROSS_COMPILE_ARM32)$(cc-name)
 endif
@@ -68,7 +72,11 @@ VDSO_CFLAGS += -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
                -Werror-implicit-function-declaration \
                -Wno-format-security \
                -std=gnu89
+ifeq ($(cc-name),clang)
+VDSO_CFLAGS  += -O3
+else
 VDSO_CFLAGS  += -O2
+endif
 # Some useful compiler-dependent flags from top-level Makefile
 VDSO_CFLAGS += $(call cc32-option,-Wdeclaration-after-statement,)
 VDSO_CFLAGS += $(call cc32-option,-Wno-pointer-sign)
@@ -97,8 +105,6 @@ VDSO_LDFLAGS += -Wl,-z,max-page-size=4096 -Wl,-z,common-page-size=4096
 VDSO_LDFLAGS += -nostdlib -shared -mfloat-abi=soft
 VDSO_LDFLAGS += $(call cc32-ldoption,-Wl$(comma)--hash-style=sysv)
 VDSO_LDFLAGS += $(call cc32-ldoption,-Wl$(comma)--build-id)
-VDSO_LDFLAGS += $(call cc32-ldoption,-fuse-ld=bfd)
-
 
 # Borrow vdsomunge.c from the arm vDSO
 # We have to use a relative path because scripts/Makefile.host prefixes

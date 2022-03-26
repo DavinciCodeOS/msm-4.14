@@ -529,6 +529,7 @@ ifneq ($(LLVM_IAS),1)
 CLANG_FLAGS	+= -no-integrated-as
 endif
 CLANG_FLAGS	+= -Werror=unknown-warning-option
+CLANG_FLAGS	+= $(call cc-option, -Wno-misleading-indentation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-bool-operation)
 CLANG_FLAGS	+= $(call cc-option, -Wno-unsequenced)
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
@@ -697,21 +698,10 @@ LDFINAL_vmlinux := $(LD)
 LD		:= $(LDGOLD)
 LDFLAGS		+= -plugin LLVMgold.so
 endif
-
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
-ifneq ($(findstring llvm-ar,$(AR)),)
-LLVM_AR		:= $(AR)
-else
 LLVM_AR		:= llvm-ar
-endif
-
-ifneq ($(findstring llvm-nm,$(NM)),)
-LLVM_NM		:= $(NM)
-else
 LLVM_NM		:= llvm-nm
-endif
-
 export LLVM_AR LLVM_NM
 
 # Set O3 optimization level for LTO
