@@ -1,13 +1,13 @@
 FROM registry.fedoraproject.org/fedora-minimal:rawhide
 
 # Install all dependencies
-RUN microdnf install -y git-core diffutils findutils glibc-headers-x86 glibc-devel openssl-devel which bc bash perl python3
+RUN microdnf install -y git-core diffutils findutils glibc-headers-x86 glibc-devel openssl-devel which bc bash perl python3 tar xz
 
-# Install a clang/LLVM toolchain from Google
-RUN git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 --single-branch -b ndk-r25-beta1 --depth 1 /tmp/toolchain && \
-    rm -rf /tmp/toolchain/.git && \
-    mv /tmp/toolchain/clang-r437112b /toolchain && \
-    rm -rf /tmp/toolchain
+# Install a clang/LLVM toolchain that we previously built
+RUN mkdir /tmp/toolchain && \
+    cd /tmp/toolchain && \
+    curl https://ftp.travitia.xyz/clang/clang-81f5c6270cdfcdf80e6296df216b696a7a37c8b5.tar.xz -o clang.tar.xz && \
+    tar xf clang.tar.xz
 
 # Copy Kernel sources (current working directory) to /src
 WORKDIR /src
@@ -16,7 +16,7 @@ COPY . .
 # Set up environment variables for Kbuild
 ENV KBUILD_BUILD_USER=adrian
 ENV KBUILD_BUILD_HOST=lillia
-ENV PATH="/toolchain/bin:$PATH"
+ENV PATH="/tmp/toolchain/bin:$PATH"
 
 # Cleanup remains of old builds
 RUN make mrproper LLVM=1 LLVM_IAS=1 && rm -rf out/
