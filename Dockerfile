@@ -6,7 +6,7 @@ RUN microdnf install -y git-core diffutils findutils glibc-headers-x86 glibc-dev
 # Install a clang/LLVM toolchain that we previously built
 RUN mkdir /tmp/toolchain && \
     cd /tmp/toolchain && \
-    curl https://ftp.travitia.xyz/clang/clang-81f5c6270cdfcdf80e6296df216b696a7a37c8b5.tar.xz -o clang.tar.xz && \
+    curl https://ftp.travitia.xyz/clang/clang-latest.tar.xz -o clang.tar.xz && \
     tar xf clang.tar.xz
 
 # Copy Kernel sources (current working directory) to /src
